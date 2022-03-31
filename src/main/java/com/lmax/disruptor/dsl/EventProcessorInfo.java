@@ -75,6 +75,7 @@ class EventProcessorInfo<T> implements ConsumerInfo
     @Override
     public void start(final ThreadFactory threadFactory)
     {
+        // 绑定EventProcessor到Thread, 然后启动
         final Thread thread = threadFactory.newThread(eventprocessor);
         if (null == thread)
         {

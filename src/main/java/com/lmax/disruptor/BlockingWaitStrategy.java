@@ -20,6 +20,12 @@ package com.lmax.disruptor;
 
  *
  * <p>This strategy can be used when throughput and low-latency are not as important as CPU resource.
+ *
+ * Disruptor默认的等待策略是BlockingWaitStategy。
+ * 在BlockingWaitStategy内部使用一个典型的锁和条件(a typical lock and condition)变量处理线程唤醒。
+ * BlockingWaitStategy是可用等待策略中最慢的，但也是在CPU使用上最保守的，同时也将在最广泛的部署选项中提供最一致的行为。
+ * 然而，再说一次，了解部署系统可以获得额外的性能提升。
+ *
  */
 public final class BlockingWaitStrategy implements WaitStrategy
 {
@@ -45,6 +51,7 @@ public final class BlockingWaitStrategy implements WaitStrategy
         while ((availableSequence = dependentSequence.get()) < sequence)
         {
             barrier.checkAlert();
+            // 乐观锁实现
             Thread.onSpinWait();
         }
 

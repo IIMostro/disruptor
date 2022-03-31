@@ -199,8 +199,10 @@ public final class RingBuffer<E> extends RingBufferFields<E> implements Cursored
         final int bufferSize,
         final WaitStrategy waitStrategy)
     {
+        // 判断是哪种生产者类型
         switch (producerType)
         {
+            // Sequence不同
             case SINGLE:
                 return createSingleProducer(factory, bufferSize, waitStrategy);
             case MULTI:
@@ -967,6 +969,7 @@ public final class RingBuffer<E> extends RingBufferFields<E> implements Cursored
     {
         try
         {
+            // 赋值，将EventFactory初始化出来的对象赋值
             translator.translateTo(get(sequence), sequence);
         }
         finally

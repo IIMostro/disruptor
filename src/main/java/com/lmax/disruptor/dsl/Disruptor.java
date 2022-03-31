@@ -79,10 +79,15 @@ public class Disruptor<T>
      * Create a new Disruptor.
      *
      * @param eventFactory   the factory to create events in the ring buffer.
+     *                       事件生成工厂
      * @param ringBufferSize the size of the ring buffer, must be power of 2.
+     *                       ringBufferSize大小，必须是2的幕
      * @param threadFactory  a {@link ThreadFactory} to create threads for processors.
+     *                       线程工厂
      * @param producerType   the claim strategy to use for the ring buffer.
+     *                       生产类型
      * @param waitStrategy   the wait strategy to use for the ring buffer.
+     *                       等待策略
      */
     public Disruptor(
             final EventFactory<T> eventFactory,
@@ -264,6 +269,7 @@ public class Disruptor<T>
      * Publish an event to the ring buffer.
      *
      * @param eventTranslator the translator that will load data into the event.
+     *                        简单的理解为翻译器
      */
     public void publishEvent(final EventTranslator<T> eventTranslator)
     {
@@ -336,7 +342,9 @@ public class Disruptor<T>
      */
     public RingBuffer<T> start()
     {
+        // 判断是不是已经启动了
         checkOnlyStartedOnce();
+        // 这个地方启动封装了的Handler
         for (final ConsumerInfo consumerInfo : consumerRepository)
         {
             consumerInfo.start(threadFactory);

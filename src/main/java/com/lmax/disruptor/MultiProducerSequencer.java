@@ -116,6 +116,7 @@ public final class MultiProducerSequencer extends AbstractSequencer
             throw new IllegalArgumentException("n must be > 0 and < bufferSize");
         }
 
+        // 利用VarHandle原子操作加到下一个序列
         long current = cursor.getAndAdd(n);
 
         long nextSequence = current + n;

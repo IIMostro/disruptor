@@ -124,6 +124,7 @@ public final class SingleProducerSequencer extends SingleProducerSequencerFields
     @Override
     public long next()
     {
+        // 占坑开始
         return next(1);
     }
 
@@ -133,6 +134,7 @@ public final class SingleProducerSequencer extends SingleProducerSequencerFields
     @Override
     public long next(final int n)
     {
+        // 判断是不是单线程使用的SingleProducerSequencer
         assert sameThread() : "Accessed by two threads - use ProducerType.MULTI!";
 
         if (n < 1 || n > bufferSize)
@@ -140,25 +142,37 @@ public final class SingleProducerSequencer extends SingleProducerSequencerFields
             throw new IllegalArgumentException("n must be > 0 and < bufferSize");
         }
 
+        // 复制上次申请之后的序列
         long nextValue = this.nextValue;
 
+        // 加n 得到本次发送之后的一个nextValue
         long nextSequence = nextValue + n;
+        // 可能发生绕环点， 本次申请值为一圈
         long wrapPoint = nextSequence - bufferSize;
+        //数值最小的序列号
         long cachedGatingSequence = this.cachedValue;
 
+        /*
+            这个地方判断了是不是有绕环点
+            wrapPoint > cachedGatingSequence 就是发生绕环了： 就是生产者的序列已经到了消费者序列的后面。
+            cachedGatingSequence > nextValue 消费者追上了生产者
+            发生了上诉的两种情况就需要cas等待了。
+         */
         if (wrapPoint > cachedGatingSequence || cachedGatingSequence > nextValue)
         {
             cursor.setVolatile(nextValue);  // StoreLoad fence
 
             long minSequence;
+            // 消费者的需要向前移动就会跳出循环
             while (wrapPoint > (minSequence = Util.getMinimumSequence(gatingSequences, nextValue)))
             {
                 LockSupport.parkNanos(1L); // TODO: Use waitStrategy to spin?
             }
-
+            //这个地方把最小的sequence赋值给了cachedValue
             this.cachedValue = minSequence;
         }
 
+        // 就是在这个地方重新赋值的
         this.nextValue = nextSequence;
 
         return nextSequence;
@@ -222,7 +236,14 @@ public final class SingleProducerSequencer extends SingleProducerSequencerFields
     @Override
     public void publish(final long sequence)
     {
+        //  在发布此位置可用时，需要更新Sequencer内部游标值，
+        //  并在使用阻塞等待策略时，通知等待可用事件的消费者进行继续消费
         cursor.set(sequence);
+        /* 通知等待策略干活了
+            简单解释下在BlockingWaitStrategy中的逻辑
+            BlockingWaitStrategy的等待策略是 Object.wait()
+            然后这个地方的实现就是Object.notifyAll()
+         */
         waitStrategy.signalAllWhenBlocking();
     }
 

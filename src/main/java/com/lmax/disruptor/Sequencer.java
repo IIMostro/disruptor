@@ -22,19 +22,22 @@ public interface Sequencer extends Cursored, Sequenced
 {
     /**
      * Set to -1 as sequence starting point
+     * 序号开始的位置
      */
     long INITIAL_CURSOR_VALUE = -1L;
 
     /**
      * Claim a specific sequence.  Only used if initialising the ring buffer to
      * a specific value.
-     *
+     *  声明指定序号， 初始化RingBuffer时有用到
      * @param sequence The sequence to initialise too.
      */
     void claim(long sequence);
 
     /**
      * Confirms if a sequence is published and the event is available for use; non-blocking.
+     *
+     * 判断某个序号是不是可用
      *
      * @param sequence of the buffer to check
      * @return true if the sequence is available for use, false if not
@@ -45,12 +48,16 @@ public interface Sequencer extends Cursored, Sequenced
      * Add the specified gating sequences to this instance of the Disruptor.  They will
      * safely and atomically added to the list of gating sequences.
      *
+     * 增加门控序列，用于生产者在生产时避免追尾消费
+     *
      * @param gatingSequences The sequences to add.
      */
     void addGatingSequences(Sequence... gatingSequences);
 
     /**
      * Remove the specified sequence from this sequencer.
+     *
+     * 移除门控序列
      *
      * @param sequence to be removed.
      * @return <code>true</code> if this sequence was found, <code>false</code> otherwise.
@@ -61,6 +68,8 @@ public interface Sequencer extends Cursored, Sequenced
      * Create a new SequenceBarrier to be used by an EventProcessor to track which messages
      * are available to be read from the ring buffer given a list of sequences to track.
      *
+     * 消费者使用，用于追踪指定序列， 通常是上一组消费者序列
+     *
      * @param sequencesToTrack All of the sequences that the newly constructed barrier will wait on.
      * @return A sequence barrier that will track the specified sequences.
      * @see SequenceBarrier
@@ -70,6 +79,8 @@ public interface Sequencer extends Cursored, Sequenced
     /**
      * Get the minimum sequence value from all of the gating sequences
      * added to this ringBuffer.
+     *
+     * 获取追踪序列中最小的序列
      *
      * @return The minimum gating sequence or the cursor sequence if
      * no sequences have been added.

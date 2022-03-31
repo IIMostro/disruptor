@@ -26,6 +26,8 @@ public interface Cursored
     /**
      * Get the current cursor value.
      *
+     * 获取生产者当前游标
+     *
      * @return current cursor value
      */
     long getCursor();
