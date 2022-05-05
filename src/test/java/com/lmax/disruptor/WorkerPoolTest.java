@@ -10,10 +10,15 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.junit.Test;
 
 import com.lmax.disruptor.util.DaemonThreadFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class WorkerPoolTest
 {
+
+    private static final Logger logger = LoggerFactory.getLogger(WorkerPoolTest.class);
+
     @SuppressWarnings("unchecked")
     @Test
     public void shouldProcessEachMessageByOnlyOneWorker() throws Exception
@@ -30,7 +35,7 @@ public class WorkerPoolTest
         ringBuffer.publish(0);
         ringBuffer.publish(1);
 
-        Thread.sleep(500);
+        Thread.sleep(1000);
 
         assertThat(ringBuffer.get(0).get(), is(1L));
         assertThat(ringBuffer.get(1).get(), is(1L));
@@ -62,6 +67,7 @@ public class WorkerPoolTest
         public void onEvent(AtomicLong event) throws Exception
         {
             event.incrementAndGet();
+            logger.info("AtomicLongWorkHandler, current thread:{}, event:{}", Thread.currentThread().getName(), event.intValue());
         }
     }
 

@@ -55,6 +55,9 @@ dependencies {
     checkstyle 'com.puppycrawl.tools:checkstyle:8.2'
     testCompile 'junit:junit:4.12'
     perfCompile 'org.hdrhistogram:HdrHistogram:1.2.1'
+    implementation 'org.slf4j:slf4j-api:1.7.36'
+    implementation 'ch.qos.logback:logback-classic:1.2.10'
+    implementation 'ch.qos.logback:logback-core:1.2.10'
 }
 
 idea.module {
